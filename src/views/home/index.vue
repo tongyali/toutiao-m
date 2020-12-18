@@ -9,6 +9,7 @@
           size="small"
           class="search-btn"
           icon="search"
+          to="/search"
           >首页</van-button
         >
       </div>
@@ -23,16 +24,38 @@
         <article-list :channel="channel"></article-list>
       </van-tab>
       <div class="placeholder" slot="nav-right"></div>
-      <div slot="nav-right" class="hamburger-btn">
+      <div
+        slot="nav-right"
+        class="hamburger-btn"
+        @click="isShowSelectChannel = true"
+      >
         <i class="toutiao toutiao-gengduo"></i>
       </div>
     </van-tabs>
+    <!-- 频道下方弹出框 -->
+    <van-popup
+      v-model="isShowSelectChannel"
+      closeable
+      position="bottom"
+      close-icon-position="top-left"
+      :style="{ height: '100%' }"
+      round
+    >
+      <channel-edit
+        :channels="channels"
+        :active="active"
+        @chenageActive="chenageActive"
+      />
+    </van-popup>
   </div>
 </template>
 <script>
 import { getUserChannel } from '@/api/user'
 //导入文章列表组件
 import ArticleList from './components/article-list'
+import ChannelEdit from './components/channel-edit'
+import { mapState } from 'vuex'
+import { getItem } from '@/utils/storage'
 export default {
   name: 'homeIndex',
   created() {
@@ -40,24 +63,53 @@ export default {
   },
   mounted() {},
   components: {
-    ArticleList
+    ArticleList,
+    ChannelEdit
   },
   data() {
     return {
       active: 0,
-      channels: []
+      channels: [],
+      isShowSelectChannel: false
     }
   },
   methods: {
     async getUserList() {
-      try {
-        const { data } = await getUserChannel()
-        this.channels = data.data.channels
-        // console.log(this.channels)
-      } catch (err) {}
+      //判断用户是否登录
+      if (this.user) {
+        try {
+          const { data } = await getUserChannel()
+          this.channels = data.data.channels
+          // console.log(this.channels)
+        } catch (err) {
+          this.$toast('获取频道失败，请重试！')
+        }
+      } else {
+        //判断是否有本地存储
+        const channel = getItem('TOUTIAO_CHANNEL')
+        if (channel) {
+          //有本地存储
+          this.channels = channel
+        } else {
+          //没有本地存储  获取接口数据
+          try {
+            const { data } = await getUserChannel()
+            this.channels = data.data.channels
+          } catch (err) {
+            this.$taost('获取频道失败，请重试')
+          }
+        }
+      }
+    },
+    //频道的跳转  子传父
+    chenageActive(active, isShowSelectChannel = true) {
+      this.active = active
+      this.isShowSelectChannel = isShowSelectChannel
     }
   },
-  computed: {}
+  computed: {
+    ...mapState(['user'])
+  }
 }
 </script>
 <style lang="less">
