@@ -3,13 +3,18 @@
     <van-cell title="搜索历史">
       <!-- 使用 right-icon 插槽来自定义右侧图标 -->
       <div v-if="isDelete">
-        <span>全部删除</span>
+        <span @click="deleteAll">全部删除</span>
         &nbsp;&nbsp;
         <span @click="isDelete = false">完成</span>
       </div>
       <van-icon name="delete" v-else @click="isDelete = true" />
     </van-cell>
-    <van-cell title="单元格">
+    <van-cell
+      :title="item"
+      v-for="(item, index) in searchHistories"
+      :key="index"
+      @click="onChangeHistories(item, index)"
+    >
       <van-icon name="close" v-show="isDelete" />
     </van-cell>
   </div>
@@ -28,7 +33,19 @@ export default {
       isDelete: false
     }
   },
-  methods: {},
+  methods: {
+    onChangeHistories(item, index) {
+      if (this.isDelete) {
+        this.searchHistories.splice(index, 1)
+      } else {
+        this.$emit('searchHistory', item)
+      }
+    },
+    //删除全部
+    deleteAll() {
+      this.searchHistories.splice(0)
+    }
+  },
   computed: {},
   components: {}
 }

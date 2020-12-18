@@ -20,17 +20,22 @@
       @search="onSearch"
     />
     <!-- 搜索历史 -->
-    <search-history v-else :search-histories="searchHistories" />
+    <search-history
+      v-else
+      :search-histories="searchHistories"
+      @searchHistory="onSearch"
+    />
   </div>
 </template>
 <script>
 import searchResult from './components/search-result'
 import searchHistory from './components/search-history'
 import searchSuggest from './components/search-suggest'
+import { getItem, setItem } from '@/utils/storage'
 export default {
   name: 'saerchIndex',
   created() {
-    console.log(this.searchText)
+    // console.log(this.searchText)
   },
   mounted() {},
   data() {
@@ -38,7 +43,7 @@ export default {
       searchText: '',
       isShowSearchResult: false,
       //历史记录
-      searchHistories: []
+      searchHistories: getItem('TOUTIAO_SEARCH_HISTORY') || []
     }
   },
   methods: {
@@ -58,7 +63,11 @@ export default {
       // console.log('cancle')
     }
   },
-  computed: {},
+  watch: {
+    searchHistories(val) {
+      setItem('TOUTIAO_SEARCH_HISTORY', val)
+    }
+  },
   components: {
     searchResult,
     searchHistory,
