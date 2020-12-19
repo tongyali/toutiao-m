@@ -5,6 +5,9 @@
       name: 'article',
       params: {
         articleId: article.art_id
+      },
+      query: {
+        artiCle: 'normal'
       }
     }"
   >

@@ -33,20 +33,8 @@
           <div slot="label" class="publish-date">
             {{ article.pubdate | relativeTime }}
           </div>
-          <van-button
-            class="follow-btn"
-            type="info"
-            color="#3296fa"
-            round
-            size="small"
-            icon="plus"
-            >关注</van-button
-          >
-          <!-- <van-button
-            class="follow-btn"
-            round
-            size="small"
-          >已关注</van-button> -->
+          <!-- 关注用户 -->
+          <follow-user v-model="article.is_followed" :aut-id="article.aut_id" />
         </van-cell>
         <!-- /用户信息 -->
 
@@ -57,6 +45,32 @@
           ref="articleContent"
         ></div>
         <van-divider>正文结束</van-divider>
+        <!-- 评论区域 -->
+        <comment-list
+          :source="article.art_id"
+          @total="totalCount = $event.total_count"
+        />
+        <!-- 底部区域 -->
+        <div class="article-bottom">
+          <van-button class="comment-btn" type="default" round size="small"
+            >写评论</van-button
+          >
+          <van-icon name="comment-o" :badge="totalCount" color="#777" />
+          <!-- 收藏文章 -->
+          <collect-article
+            class="btn-item"
+            v-model="article.is_collected"
+            :art-id="article.art_id"
+          />
+          <!-- 文章点赞 -->
+          <like-article
+            v-model="article.attitude"
+            :art-id="article.art_id"
+            class="btn-item"
+          />
+          <van-icon name="share" color="#777777"></van-icon>
+        </div>
+        <!-- /底部区域 -->
       </div>
       <!-- /加载完成-文章详情 -->
 
@@ -75,18 +89,6 @@
       </div>
       <!-- /加载失败：其它未知错误（例如网络原因或服务端异常） -->
     </div>
-
-    <!-- 底部区域 -->
-    <div class="article-bottom">
-      <van-button class="comment-btn" type="default" round size="small"
-        >写评论</van-button
-      >
-      <van-icon name="comment-o" badge="123" color="#777" />
-      <van-icon color="#777" name="star-o" />
-      <van-icon color="#777" name="good-job-o" />
-      <van-icon name="share" color="#777777"></van-icon>
-    </div>
-    <!-- /底部区域 -->
   </div>
 </template>
 
@@ -94,11 +96,18 @@
 import { getArticleDetails } from '@/api/article'
 //图片预览
 import { ImagePreview } from 'vant'
-
-// ImagePreview(['https://img.yzcdn.cn/vant/apple-1.jpg'])
+import followUser from '@/components/follow-user'
+import collectArticle from '@/components/collect-article'
+import likeArticle from '@/components/like-article'
+import commentList from './components/comment-list'
 export default {
   name: 'ArticleIndex',
-  components: {},
+  components: {
+    followUser,
+    collectArticle,
+    likeArticle,
+    commentList
+  },
   props: {
     articleId: {
       type: [Number, String, Object],
@@ -109,7 +118,9 @@ export default {
     return {
       article: {},
       isloading: true,
-      errStatus: 0
+      errStatus: 0,
+      //评论总数
+      totalCount: 0
     }
   },
   computed: {},
@@ -269,12 +280,26 @@ export default {
       line-height: 46px;
       color: #a7a7a7;
     }
-    .van-icon {
+    /deep/ .van-icon {
       font-size: 40px;
       .van-info {
         font-size: 16px;
         background-color: #e22829;
       }
+    }
+    .btn-item {
+      border: none;
+      padding: 0;
+      height: 40px;
+      line-height: 40px;
+      color: #777777;
+      background-color: #fff;
+    }
+    .collect-btn--collected {
+      color: #ffa500;
+    }
+    .like-btn--liked {
+      color: #e5645f;
     }
   }
 }
